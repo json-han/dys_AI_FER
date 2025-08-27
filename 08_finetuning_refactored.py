@@ -28,7 +28,7 @@ config = {
     "general_val_csv_path": '07_general_val_set.csv',
     "mlflow_tracking_uri": "http://0.0.0.0:5000",
     "mlflow_experiment_name": "FER Fine-tuning with Soft Labels",
-    "mlflow_run_name": "fine_tuning_run_1_refactored",
+    "mlflow_run_name": "fine_tuning_run_2",
     "patience": 3,  # Early Stopping patience
     "min_delta": 0.001, # Minimum change to qualify as an improvement
 }
