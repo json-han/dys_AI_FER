@@ -1,0 +1,9 @@
+{
+    "기쁨": {"happy": 1.0},
+    "당황": {"fear": 0.3, "surprise": 0.5, "neutral": 0.2},
+    "분노": {"anger": 0.8, "neutral": 0.2},
+    "불안": {"fear": 1.0},
+    "상처": {"sad": 0.7, "neutral": 0.3},
+    "슬픔": {"sad": 0.7, "neutral": 0.3},
+    "중립": {"neutral": 1.0}
+}
