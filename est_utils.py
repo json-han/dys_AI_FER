@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ExifTags
 from tqdm import tqdm
 
 # --- Configuration ---
-BASE_DIR = 'workspace/AI/FER/Data/EST_data'
+BASE_DIR = '/workspace/AI/FER/Data/EST_data'
 IMG_SPLITS = ['img_train', 'img_val', 'img_test']
 SEG_SPLITS = ['seg_train', 'seg_val', 'seg_test']
 LABEL_SPLITS = ['label_train', 'label_val', 'label_test']
