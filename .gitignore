@@ -1,5 +1,7 @@
 __pycache__/
+/*.pyc
 Data/
 output/
 best_model.pth
 testset_confirm.ipynb
+.gitignore
