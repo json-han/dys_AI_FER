@@ -22,13 +22,15 @@ from est_utils import correct_image_orientation, BACKBONE_CLASSES, FONT_PROP
 config = {
     "model_name": "HardlyHumans/Facial-expression-detection",
     "learning_rate": 5e-6,  # Lowered learning rate
-    "epochs": 5,
+    "epochs": 10,
+    "optimizer": "AdamW",
+    "loss_function": "KLDivLoss",
     "batch_size": 16,
-    "train_csv_path": '06_softlabel_dataset_resplit.csv',
-    "general_val_csv_path": '07_general_val_set.csv',
+    "train_csv_path": './output/06_softlabel_dataset_resplit.csv',
+    "general_val_csv_path": './output/07_general_val_set.csv',
     "mlflow_tracking_uri": "http://0.0.0.0:5000",
     "mlflow_experiment_name": "FER Fine-tuning with Soft Labels",
-    "mlflow_run_name": "fine_tuning_run_2",
+    "mlflow_run_name": "fine_tuning_run_3",
     "patience": 3,  # Early Stopping patience
     "min_delta": 0.001, # Minimum change to qualify as an improvement
 }
@@ -220,19 +222,23 @@ def run_fine_tuning(config):
                 best_val_loss = avg_val_loss
                 epochs_no_improve = 0
                 # Optional: Save best model state here
-                # torch.save(model.state_dict(), "best_model.pth")
+                torch.save(model.state_dict(), "best_model.pth")
             else:
                 epochs_no_improve += 1
                 if epochs_no_improve >= config['patience']:
                     print(f"Early stopping triggered at epoch {epoch+1} due to no improvement in validation loss for {config['patience']} epochs.")
                     break
-        
-        mlflow.pytorch.log_model(model, "emotion_fine_tuned_model")
-        print("Fine-tuning completed and model saved to MLflow.")
 
         # ==============================================================================
-        # 4. Test Set Evaluation and Logging
+        # 4. Model Logging
         # ==============================================================================
+        print("\n==== Save model to MLflow ====")
+        mlflow.pytorch.log_model(model, name = "emotion_fine_tuned_model")
+        print("Fine-tuning completed and model saved to MLflow with signature.")
+
+        # ==============================================================================
+        # 5. Test Set Evaluation and Logging
+        # ==============================================================================      
         print("\n==== Starting Test Set Evaluation ====")
         test_dataset = EmotionDataset(config["train_csv_path"], processor, 'test', BACKBONE_CLASSES)
         test_loader = DataLoader(test_dataset, batch_size=config["batch_size"], shuffle=False)
@@ -261,7 +267,9 @@ def run_fine_tuning(config):
 
         # Generate and log Confusion Matrix
         cm = confusion_matrix(y_true_hard, y_pred_hard, labels=range(len(BACKBONE_CLASSES)))
-        cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        # 혼동 행렬에서 NaN이 발생될 수 있음. - cm.sum() 값이 0임 - 트루 라벨 중 특정 감정이 하나도 없음
+        # disgust / contempt 두 감정이 0이 맞음.
+        cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis] 
 
         # Handle NaN values for annotation
         text_annotations = np.empty_like(cm_normalized, dtype=object)
@@ -280,14 +288,14 @@ def run_fine_tuning(config):
         plt.xlabel('Predicted Label', fontproperties=FONT_PROP)
         plt.tight_layout()
         
-        cm_output_path = "08_test_confusion_matrix.png"
+        cm_output_path = f"./output/08_confusion_matrix_run{config['mlflow_run_name'][-1]}.png"
         plt.savefig(cm_output_path)
         mlflow.log_artifact(cm_output_path)
         plt.close()
         print(f"Confusion matrix saved to {cm_output_path} and logged to MLflow.")
 
 # ==============================================================================
-# 4. Main Execution
+# 6. Main Execution
 # ==============================================================================
 if __name__ == "__main__":
     run_fine_tuning(config)
