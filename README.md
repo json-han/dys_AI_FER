@@ -5,7 +5,7 @@
 ## 디렉토리 구조
 
 ```
-/workspace/AI/FER/
+최상위 디렉토리
 ├─── ... (Jupyter 노트북 및 Python 스크립트)
 ├───est_utils.py
 ├───README.md
